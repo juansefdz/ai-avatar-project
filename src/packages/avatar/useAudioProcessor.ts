@@ -37,23 +37,24 @@ export function useAudioProcessor(stream: MediaStream | null) {
     const dataArray = new Uint8Array(bufferLength);
 
     const updateVolume = () => {
-      if (!analyserRef.current) return;
-      
-      analyserRef.current.getByteFrequencyData(dataArray);
-      
-      let sum = 0;
-      for (let i = 0; i < bufferLength; i++) {
-        sum += dataArray[i];
-      }
-      const average = sum / bufferLength;
-      
-      setVolume(average);
-      // Umbral de sensibilidad para Noctra
-      setIsSpeaking(average > 15); 
+  if (!analyserRef.current) return;
+  
+  analyserRef.current.getByteFrequencyData(dataArray);
+  
+  let sum = 0;
+  for (let i = 0; i < bufferLength; i++) {
+    sum += dataArray[i];
+  }
+  const average = sum / bufferLength;
 
-      animationRef.current = requestAnimationFrame(updateVolume);
-    };
+  
+  setVolume(prev => prev + (average - prev) * 0.2); 
 
+  // Umbral de sensibilidad
+  setIsSpeaking(average > 15); 
+
+  animationRef.current = requestAnimationFrame(updateVolume);
+};
     updateVolume();
 
     return () => {

@@ -1,4 +1,4 @@
-export type CallStatus = "idle" | "connecting" | "active" | "error";
+export type CallStatus = "idle" | "connected" | "active" | "error";
 
 export interface AvatarState {
   status: CallStatus;

@@ -1,7 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
-import StreamingAvatar, { AvatarQuality } from "@heygen/streaming-avatar";
+import { useCallback, useState, useEffect } from "react";
 import type { AvatarState, CallStatus } from "./types";
 
 const INITIAL_STATE: AvatarState = {
@@ -12,40 +11,62 @@ const INITIAL_STATE: AvatarState = {
 
 export function useStreamingAvatar() {
   const [state, setState] = useState<AvatarState>(INITIAL_STATE);
-  const avatarRef = useRef<StreamingAvatar | null>(null);
 
-  const setStatus = (status: CallStatus, extra?: Partial<AvatarState>) =>
-    setState((prev) => ({ ...prev, status, ...extra }));
+  // ── FUNCIÓN DE HABLA GENERAL ──
+  const speakWithNoctraVoice = useCallback((text: string) => {
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    const voices = window.speechSynthesis.getVoices();
+    
+    // Prioridad a voz femenina de sistema
+    const noctraVoice = voices.find(v => v.name.includes("Google") && v.lang.startsWith("es")) ||
+                       voices.find(v => v.name.includes("Helena")) ||
+                       voices.find(v => v.lang.includes("es"));
 
-  const handleCall = useCallback(async () => {
-    setStatus("connecting", { stream: null, error: null });
-    try {
-      const avatarInstance = new StreamingAvatar({
-        token: process.env.NEXT_PUBLIC_HEYGEN_TOKEN || "",
-      });
-
-      await avatarInstance.createStartAvatar({
-        quality: AvatarQuality.High,
-        avatarName: "George_vines_public",
-      });
-
-      avatarRef.current = avatarInstance;
-      setStatus("active", { stream: avatarInstance.mediaStream });
-    } catch (err) {
-      const message =
-        err instanceof Error ? err.message : "Error al conectar";
-      console.error("Avatar connection error:", err);
-      setStatus("error", { error: message });
+    if (noctraVoice) {
+      utterance.voice = noctraVoice;
     }
+
+    utterance.lang = "es-ES";
+    utterance.rate = 1;
+    utterance.pitch = 2.0;
+    
+    window.speechSynthesis.speak(utterance);
+  }, []);
+
+  // ── SALUDOS GENÉRICOS ALEATORIOS ──
+  useEffect(() => {
+    if (state.status === "active") {
+      const loadAndSpeak = () => {
+        setTimeout(() => {
+          const greetings = [
+            "Hola, ¿en qué puedo ayudarte hoy?",
+            "Sistemas listos. ¿Qué tienes en mente?",
+            "Hola, soy Noctra. Estoy lista para lo que necesites.",
+            "Conexión establecida. ¿En qué vamos a trabajar?",
+            "Hola. ¿Hay algo en lo que pueda apoyarte ahora?"
+          ];
+
+          const randomGreeting = greetings[Math.floor(Math.random() * greetings.length)];
+          speakWithNoctraVoice(randomGreeting);
+        }, 1000);
+      };
+
+      if (window.speechSynthesis.getVoices().length === 0) {
+        window.speechSynthesis.onvoiceschanged = loadAndSpeak;
+      } else {
+        loadAndSpeak();
+      }
+    }
+  }, [state.status, speakWithNoctraVoice]);
+
+  // ── MANEJADORES DE ESTADO ──
+  const handleCall = useCallback(() => {
+    setState((prev) => ({ ...prev, status: "active" as CallStatus }));
   }, []);
 
   const handleHangUp = useCallback(() => {
-    try {
-      avatarRef.current?.stopAvatar();
-    } catch (_) {
-      // ignore cleanup errors
-    }
-    avatarRef.current = null;
+    window.speechSynthesis.cancel();
     setState(INITIAL_STATE);
   }, []);
 
@@ -53,5 +74,6 @@ export function useStreamingAvatar() {
     ...state,
     handleCall,
     handleHangUp,
+    speakWithNoctraVoice
   };
 }
