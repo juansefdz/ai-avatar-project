@@ -1,0 +1,22 @@
+# ──────────────────────────────────────────────────────────────────────────────
+# avatar-next.service — systemd service: runs the Next.js production server
+# Install: copy to /etc/systemd/system/ (done by setup-pi.sh)
+# ──────────────────────────────────────────────────────────────────────────────
+[Unit]
+Description=AI Avatar Next.js Server
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/home/pi/ai-avatar
+EnvironmentFile=/home/pi/ai-avatar/.env.local
+ExecStart=/usr/bin/node node_modules/.bin/next start -p 3000
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

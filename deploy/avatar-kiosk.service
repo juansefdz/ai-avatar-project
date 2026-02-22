@@ -1,0 +1,38 @@
+# ──────────────────────────────────────────────────────────────────────────────
+# avatar-kiosk.service — systemd service: launches Chromium in kiosk mode
+# Depends on avatar-next.service being up first.
+# ──────────────────────────────────────────────────────────────────────────────
+[Unit]
+Description=AI Avatar Kiosk (Chromium)
+Requires=avatar-next.service
+After=avatar-next.service graphical.target
+
+[Service]
+Type=simple
+User=pi
+Environment=DISPLAY=:0
+Environment=XAUTHORITY=/home/pi/.Xauthority
+
+# Wait a few seconds for Next.js to be ready
+ExecStartPre=/bin/sleep 6
+
+ExecStart=/usr/bin/chromium-browser \
+  --kiosk \
+  --noerrdialogs \
+  --disable-infobars \
+  --no-first-run \
+  --disable-session-crashed-bubble \
+  --disable-restore-session-state \
+  --check-for-update-interval=31536000 \
+  --disable-features=TranslateUI \
+  --disable-pinch \
+  --overscroll-history-navigation=0 \
+  http://localhost:3000
+
+Restart=on-failure
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=graphical.target
