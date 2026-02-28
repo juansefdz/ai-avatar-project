@@ -16,21 +16,34 @@ export function useStreamingAvatar() {
   const speakWithNoctraVoice = useCallback((text: string) => {
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
-    const voices = window.speechSynthesis.getVoices();
-    
-    // Prioridad a voz femenina de sistema
-    const noctraVoice = voices.find(v => v.name.includes("Google") && v.lang.startsWith("es")) ||
-                       voices.find(v => v.name.includes("Helena")) ||
-                       voices.find(v => v.lang.includes("es"));
+    const voices = window.speechSynthesis
+      .getVoices()
+      .filter((v) => v.lang.startsWith("es"));
+
+    // Prioridad a voces femeninas premium y naturales (Solo en Español)
+    const noctraVoice =
+      voices.find((v) => v.name.includes("Monica")) ||
+      voices.find((v) => v.name.includes("Paulina")) ||
+      voices.find(
+        (v) => v.name.includes("Google") && v.name.includes("Femenino"),
+      ) ||
+      voices.find((v) => v.name.includes("Helena")) ||
+      voices.find(
+        (v) =>
+          v.name.includes("Female") ||
+          v.name.includes("femenino") ||
+          v.name.includes("Femenina"),
+      ) ||
+      voices[0]; // Fallback a la primera voz en español disponible
 
     if (noctraVoice) {
       utterance.voice = noctraVoice;
     }
 
     utterance.lang = "es-ES";
-    utterance.rate = 1;
-    utterance.pitch = 2.0;
-    
+    utterance.rate = 1.1; // Más ágil y moderna, sin distorsión
+    utterance.pitch = 1.05; // Tono femenino natural, no chillón
+
     window.speechSynthesis.speak(utterance);
   }, []);
 
@@ -44,10 +57,11 @@ export function useStreamingAvatar() {
             "Sistemas listos. ¿Qué tienes en mente?",
             "Hola, soy Noctra. Estoy lista para lo que necesites.",
             "Conexión establecida. ¿En qué vamos a trabajar?",
-            "Hola. ¿Hay algo en lo que pueda apoyarte ahora?"
+            "Hola. ¿Hay algo en lo que pueda apoyarte ahora?",
           ];
 
-          const randomGreeting = greetings[Math.floor(Math.random() * greetings.length)];
+          const randomGreeting =
+            greetings[Math.floor(Math.random() * greetings.length)];
           speakWithNoctraVoice(randomGreeting);
         }, 1000);
       };
@@ -74,6 +88,6 @@ export function useStreamingAvatar() {
     ...state,
     handleCall,
     handleHangUp,
-    speakWithNoctraVoice
+    speakWithNoctraVoice,
   };
 }
