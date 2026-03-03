@@ -1,13 +1,13 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useCallback, useRef } from "react";
 import { useStreamingAvatar } from "@/packages/avatar/useStreamingAvatar";
 import { useAudioProcessor } from "@/packages/avatar/useAudioProcessor";
-import OpenClawHeart from "@/packages/ui/OpenClawHeart";
+import HoloAvatar from "@/packages/ui/HoloAvatar";
 import { motion, AnimatePresence } from "framer-motion";
 import { Activity, Shield, Cpu } from "lucide-react";
 
-// ── DEFINICIÓN DE INTERFACES PARA TYPESCRIPT ──
+// ÔöÇÔöÇ DEFINICI├ôN DE INTERFACES PARA TYPESCRIPT ÔöÇÔöÇ
 interface IWindow extends Window {
   SpeechRecognition?: new () => SpeechRecognition;
   webkitSpeechRecognition?: new () => SpeechRecognition;
@@ -38,7 +38,7 @@ export default function NoctraInterface() {
   const isProcessing = useRef(false);
   const wakeWord = "noctra";
 
-  // ── LÓGICA DE RESPUESTA (WAKE WORD) ──
+  // ÔöÇÔöÇ L├ôGICA DE RESPUESTA (WAKE WORD) ÔöÇÔöÇ
   const handleBotResponse = useCallback(async (userText: string) => {
     const normalizedText = userText.toLowerCase();
     if (!normalizedText.includes(wakeWord)) return;
@@ -67,7 +67,7 @@ export default function NoctraInterface() {
     }
   }, [speakWithNoctraVoice]);
 
-  // ── ESCUCHA CONTINUA ──
+  // ÔöÇÔöÇ ESCUCHA CONTINUA ÔöÇÔöÇ
   useEffect(() => {
     const windowContext = window as unknown as IWindow;
     const SpeechRecognitionClass = windowContext.webkitSpeechRecognition || windowContext.SpeechRecognition;
@@ -102,7 +102,7 @@ export default function NoctraInterface() {
   return (
     <div className="relative z-20 h-full w-full flex items-center justify-center overflow-hidden bg-black">
       
-      {/* ── 1. EFECTO BARRIDO DE ESCÁNER (AL ACTIVAR) ── */}
+      {/* ÔöÇÔöÇ 1. EFECTO BARRIDO DE ESC├üNER (AL ACTIVAR) ÔöÇÔöÇ */}
       <AnimatePresence>
         {status === "active" && (
           <motion.div
@@ -111,14 +111,14 @@ export default function NoctraInterface() {
             transition={{ duration: 1.2, ease: "easeInOut" }}
             className="absolute left-0 w-full h-[15vh] z-60 pointer-events-none opacity-80"
             style={{
-              background: "linear-gradient(to bottom, transparent, #8b5cf6, transparent)",
-              boxShadow: "0 0 50px #7c3aed"
+              background: "linear-gradient(to bottom, transparent, #22d3ee, transparent)",
+              boxShadow: "0 0 50px #06b6d4"
             }}
           />
         )}
       </AnimatePresence>
 
-      {/* ── 2. CAPA DE INICIO (OVERLAY) ── */}
+      {/* ÔöÇÔöÇ 2. CAPA DE INICIO (OVERLAY) ÔöÇÔöÇ */}
       <AnimatePresence>
         {status === "idle" && (
           <motion.div 
@@ -132,9 +132,9 @@ export default function NoctraInterface() {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={handleCall}
-              className="px-10 py-5 border border-violet-500/20 rounded-full bg-violet-500/5 hover:bg-violet-500/10 transition-all"
+              className="px-10 py-5 border border-cyan-500/20 rounded-full bg-cyan-500/5 hover:bg-cyan-500/10 transition-all"
             >
-              <span className="font-mono text-violet-400 tracking-[0.5em] uppercase text-[10px]">
+              <span className="font-mono text-cyan-400 tracking-[0.5em] uppercase text-[10px]">
                 Inicializar Noctra
               </span>
             </motion.button>
@@ -142,48 +142,35 @@ export default function NoctraInterface() {
         )}
       </AnimatePresence>
 
-      {/* ── 3. ONDAS DE SONIDO CENTRALES (DISEÑO ORIGINAL RESTAURADO) ── */}
-      <div className="relative z-30 flex items-center justify-center pointer-events-none">
-        <div className="flex gap-2 items-end h-24">
-          {[...Array(9)].map((_, i) => (
-            <motion.div 
-              key={i}
-              className="w-2 bg-violet-400 shadow-[0_0_20px_rgba(139,92,246,0.5)] rounded-full"
-              animate={{ 
-                height: isSpeaking ? [10, Math.random() * (volume / 2) + 20, 10] : 10,
-                opacity: isSpeaking ? 1 : 0.2
-              }}
-              transition={{ 
-                duration: 0.15, 
-                repeat: Infinity, 
-                delay: i * 0.03 
-              }}
-            />
-          ))}
-        </div>
-        
-        {/* Resplandor Central de Voz */}
-        <motion.div
-          animate={{
-            scale: isSpeaking ? [1, 1.3, 1] : 1,
-            opacity: isSpeaking ? 0.25 : 0.1
-          }}
-          className="absolute w-80 h-80 bg-violet-600/20 rounded-full blur-[80px]"
+      {/* ÔöÇÔöÇ 3. EL ROSTRO (CONTINUO Y TENUE EN IDLE) ÔöÇÔöÇ */}
+      <motion.div 
+        animate={{ 
+          opacity: status === 'active' ? 1 : 0.3,
+          scale: status === 'active' ? 1 : 0.9,
+          filter: status === 'active' ? "brightness(1) contrast(1.1)" : "brightness(0.5) contrast(0.8)"
+        }}
+        transition={{ duration: 2.5, ease: "easeOut" }}
+        className="relative z-30 pointer-events-none"
+      >
+        <HoloAvatar 
+          status={status} 
+          stream={stream} 
+          isSpeaking={isSpeaking} 
+          onCall={handleCall} 
+          volume={volume} 
         />
-      </div>
+      </motion.div>
 
-      <OpenClawHeart />
-
-      {/* ── 4. HUD DINÁMICO (FADE IN SUAVE) ── */}
+      {/* ÔöÇÔöÇ 4. HUD DIN├üMICO (FADE IN SUAVE) ÔöÇÔöÇ */}
       <div className={`absolute inset-0 transition-all duration-1000 ${status === 'active' ? 'opacity-100' : 'opacity-0'}`}>
         {/* HUD Superior */}
         <div className="absolute top-12 left-12 flex flex-col gap-2">
           <div className="flex items-center gap-3">
-            <div className="h-1.5 w-1.5 rounded-full bg-violet-500 animate-pulse" />
-            <span className="text-[9px] font-mono tracking-[0.4em] text-violet-500/60 uppercase">System_Linked</span>
+            <div className="h-1.5 w-1.5 rounded-full bg-cyan-500 animate-pulse" />
+            <span className="text-[9px] font-mono tracking-[0.4em] text-cyan-500/60 uppercase">System_Linked</span>
           </div>
           <div className="flex gap-4 mt-2">
-            <Activity size={14} className={isSpeaking ? "text-violet-400" : "text-white/10"} />
+            <Activity size={14} className={isSpeaking ? "text-cyan-400" : "text-white/10"} />
             <Cpu size={14} className="text-white/10" />
             <Shield size={14} className="text-white/10" />
           </div>
@@ -195,7 +182,7 @@ export default function NoctraInterface() {
             {[...Array(12)].map((_, i) => (
               <motion.div
                 key={i}
-                className="w-1 bg-violet-500/30"
+                className="w-1 bg-cyan-500/30"
                 animate={{ height: isSpeaking ? `${20 + Math.random() * 80}%` : "10%" }}
               />
             ))}
@@ -207,17 +194,17 @@ export default function NoctraInterface() {
         </div>
       </div>
 
-      {/* ── 5. ANILLO AMBIENTAL ── */}
+      {/* ÔöÇÔöÇ 5. ANILLO AMBIENTAL ÔöÇÔöÇ */}
       <motion.div
         animate={{
           scale: status === 'active' ? (1.1 + (volume / 400)) : 0.85,
           opacity: status === 'active' ? 0.15 : 0.05,
         }}
         transition={{ duration: 1.5 }}
-        className="absolute w-137.5 h-137.5 rounded-full border border-violet-500/20 pointer-events-none"
+        className="absolute w-137.5 h-137.5 rounded-full border border-cyan-500/20 pointer-events-none"
       />
 
-      {/* DECORACIÓN MARCO */}
+      {/* DECORACI├ôN MARCO */}
       <div className="absolute inset-20 border-x border-white/5 pointer-events-none" />
       <div className="absolute inset-y-20 left-1/2 -translate-x-1/2 w-[90%] border-t border-white/5 pointer-events-none" />
     </div>
