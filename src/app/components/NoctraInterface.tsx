@@ -35,15 +35,30 @@ export default function NoctraInterface() {
   // Estado derivado auditivo: "isListening" (Bot escuchando al cliente)
   const isListening = status === "active" && !isSpeaking && !isMicMuted;
 
-  // 1. Mostrar Tiempo y Fetch de IP Local
+  // 1. Mostrar Tiempo y Fetch de IP Local Verdadera (LAN)
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     
-    // Obtenemos la IP desde la API local del cliente
-    fetch("https://api.ipify.org?format=json")
-      .then(res => res.json())
-      .then(data => setClientIp(data.ip))
-      .catch(() => setClientIp("190.255.133.23"));
+    // Función para obtener la IP Local mediante WebRTC
+    const getLocalIP = async () => {
+      try {
+        const pc = new RTCPeerConnection({ iceServers: [] });
+        pc.createDataChannel("");
+        pc.createOffer().then(offer => pc.setLocalDescription(offer));
+        pc.onicecandidate = (ice) => {
+          if (!ice || !ice.candidate || !ice.candidate.candidate) return;
+          const match = ice.candidate.candidate.match(/([0-9]{1,3}(\.[0-9]{1,3}){3})/);
+          if (match && match[1]) {
+            setClientIp(match[1]);
+            pc.onicecandidate = null;
+          }
+        };
+      } catch (e) {
+        setClientIp("192.168.1.4");
+      }
+    };
+
+    getLocalIP();
 
     return () => clearInterval(timer);
   }, []);
