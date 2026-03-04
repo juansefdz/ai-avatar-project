@@ -39,26 +39,12 @@ export default function NoctraInterface() {
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     
-    // Función para obtener la IP Local mediante WebRTC
-    const getLocalIP = async () => {
-      try {
-        const pc = new RTCPeerConnection({ iceServers: [] });
-        pc.createDataChannel("");
-        pc.createOffer().then(offer => pc.setLocalDescription(offer));
-        pc.onicecandidate = (ice) => {
-          if (!ice || !ice.candidate || !ice.candidate.candidate) return;
-          const match = ice.candidate.candidate.match(/([0-9]{1,3}(\.[0-9]{1,3}){3})/);
-          if (match && match[1]) {
-            setClientIp(match[1]);
-            pc.onicecandidate = null;
-          }
-        };
-      } catch (e) {
-        setClientIp("192.168.1.4");
-      }
-    };
-
-    getLocalIP();
+    // El método más seguro y certero sin apis externas es leer el Host local actual
+    if (typeof window !== "undefined") {
+      const hostname = window.location.hostname;
+      // Si estamos en localhost directo la mostramos, sino la IP real (192.x) que se usó para acceder
+      setClientIp(hostname === "localhost" ? "127.0.0.1" : hostname);
+    }
 
     return () => clearInterval(timer);
   }, []);
