@@ -42,7 +42,9 @@ chromium --enable-features=UseOzonePlatform \\
   --ozone-platform=wayland \\
   --ignore-gpu-blocklist \\
   --enable-gpu-rasterization \\
-  --enable-zero-copy \\
+  --enable-native-gpu-memory-buffers \\
+  --autoplay-policy=no-user-gesture-required \\
+  --use-fake-ui-for-media-stream \\
   --kiosk \\
   --noerrdialogs \\
   --disable-infobars \\
