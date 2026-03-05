@@ -7,7 +7,7 @@
 echo "--- Iniciando configuración de Modo Noctra ---"
 
 # 1. Actualizar sistema e instalar dependencias necesarias
-sudo apt update && sudo apt install -y wayfire xwayland chromium-browser sed
+sudo apt update && sudo apt install -y wayfire xwayland chromium sed
 
 # 2. Configurar auto-login en la terminal (si no está activo)
 sudo raspi-config nonint do_boot_behaviour B4
