@@ -22,13 +22,19 @@ uvicorn main:app --host 0.0.0.0 --port 8000 &
 
 # 2. Iniciar Next.js en background
 cd /home/raspberry/ai-avatar-project
-/home/raspberry/.npm-global/bin/pm2 start npm --name "avatar-next" -- start &
+/home/raspberry/.npm-global/bin/pm2 start npm --name "avatar-next" -- start -- -H 0.0.0.0 &
 
-# 3. Esperar a que Next.js y el API estén listos
-sleep 15
+# 3. Esperar a que Next.js y el API estén listos (Loop de verificación)
+echo "Esperando a que Next.js arranque en el puerto 3000..."
+for i in {1..30}; do
+  if curl -s -I http://127.0.0.1:3000 | grep -q "200 OK"; then
+    echo "Next.js está en línea."
+    break
+  fi
+  sleep 2
+done
 
-
-# 3. Lanzar Chromium en modo Noctra usando Wayland a 60fps
+# 4. Lanzar Chromium en modo Noctra usando Wayland a 60fps
 # Optimizaciones para aceleración por hardware en Raspi 5
 export DISPLAY=:0
 export WAYLAND_DISPLAY=wayland-1
@@ -40,7 +46,7 @@ chromium --enable-features=UseOzonePlatform \\
   --kiosk \\
   --noerrdialogs \\
   --disable-infobars \\
-  --app=http://localhost:3000
+  --app=http://127.0.0.1:3000
 EOF
 
 chmod +x ~/launch_noctra.sh
