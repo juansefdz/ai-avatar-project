@@ -1,9 +1,9 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
-from .agent import agent
+from agent import agent
 
-app = FastAPI(title="AVA Brain Layer API", description="Antigravity Orquestation endpoint for Noctra Interface")
+app = FastAPI(title="AVA Brain Layer API", description=" Orquestation endpoint for Noctra Interface")
 
 # Permitir a Next.js consumir la API localmente
 app.add_middleware(

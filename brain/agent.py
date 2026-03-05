@@ -1,5 +1,5 @@
 from typing import List
-from .memory import memory_store
+from memory import memory_store
 import os
 import random
 from datetime import datetime
