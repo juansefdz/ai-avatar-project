@@ -27,7 +27,7 @@ sleep 10
 # Optimizaciones para aceleración por hardware en Raspi 5
 export DISPLAY=:0
 export WAYLAND_DISPLAY=wayland-1
-chromium-browser --enable-features=UseOzonePlatform \\
+chromium --enable-features=UseOzonePlatform \\
   --ozone-platform=wayland \\
   --ignore-gpu-blocklist \\
   --enable-gpu-rasterization \\
