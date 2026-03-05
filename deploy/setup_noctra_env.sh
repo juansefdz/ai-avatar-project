@@ -22,7 +22,7 @@ uvicorn main:app --host 0.0.0.0 --port 8000 &
 
 # 2. Iniciar Next.js en background
 cd /home/raspberry/ai-avatar-project
-npm start &
+/home/raspberry/.npm-global/bin/pm2 start npm --name "avatar-next" -- start &
 
 # 3. Esperar a que Next.js y el API estén listos
 sleep 15
