@@ -15,39 +15,53 @@ sudo raspi-config nonint do_boot_behaviour B4
 # 3. Crear el script de inicio del navegador y backend
 cat <<EOF > ~/launch_noctra.sh
 #!/bin/bash
-# 1. Iniciar el Brain API (FastAPI) en background
+# 1. Limpiar procesos previos y puertos para evitar zombis
+sudo fuser -k 3000/tcp 2>/dev/null
+sudo fuser -k 8000/tcp 2>/dev/null
+/home/raspberry/.npm-global/bin/pm2 delete avatar-next 2>/dev/null
+pkill -f node
+pkill -f uvicorn
+pkill -f chromium
+
+# 2. Iniciar el Brain API (FastAPI)
 cd /home/raspberry/ai-avatar-project/brain
 source venv/bin/activate
 uvicorn main:app --host 0.0.0.0 --port 8000 &
+echo "Brain API iniciado."
 
-# 2. Iniciar Next.js en background
+# 3. Iniciar Next.js en background con PM2
 cd /home/raspberry/ai-avatar-project
-/home/raspberry/.npm-global/bin/pm2 start npm --name "avatar-next" -- start -- -H 0.0.0.0 &
+/home/raspberry/.npm-global/bin/pm2 start npm --name "avatar-next" -- start -- -H 0.0.0.0
+echo "Next.js iniciado via PM2."
 
-# 3. Esperar a que Next.js y el API estén listos (Loop de verificación)
-echo "Esperando a que Next.js arranque en el puerto 3000..."
-for i in {1..30}; do
+# 4. Esperar a que Next.js responda (Loop de salud con timeout de 120s)
+echo "Esperando a que la interfaz Noctra esté lista..."
+for i in {1..60}; do
   if curl -s -I http://127.0.0.1:3000 | grep -q "200 OK"; then
-    echo "Next.js está en línea."
+    echo "¡Interfaz en línea!"
     break
   fi
   sleep 2
 done
 
-# 4. Lanzar Chromium en modo Noctra usando Wayland a 60fps
-# Optimizaciones para aceleración por hardware en Raspi 5
+# 5. Lanzar Chromium optimizado para RPi 5
 export DISPLAY=:0
 export WAYLAND_DISPLAY=wayland-1
-chromium --enable-features=UseOzonePlatform \\
-  --ozone-platform=wayland \\
-  --ignore-gpu-blocklist \\
-  --enable-gpu-rasterization \\
-  --enable-native-gpu-memory-buffers \\
-  --autoplay-policy=no-user-gesture-required \\
-  --use-fake-ui-for-media-stream \\
-  --kiosk \\
-  --noerrdialogs \\
-  --disable-infobars \\
+export XDG_RUNTIME_DIR=/run/user/$(id -u)
+
+chromium \
+  --enable-features=UseOzonePlatform,WaylandWindowDecorations,WebRtcAllowInputVolumeAdjustment \
+  --ozone-platform=wayland \
+  --ignore-gpu-blocklist \
+  --enable-gpu-rasterization \
+  --enable-native-gpu-memory-buffers \
+  --autoplay-policy=no-user-gesture-required \
+  --use-fake-ui-for-media-stream \
+  --force-device-scale-factor=1.0 \
+  --disable-features=Translate,OptimizationHints \
+  --kiosk \
+  --noerrdialogs \
+  --disable-infobars \
   --app=http://127.0.0.1:3000
 EOF
 
