@@ -7,8 +7,8 @@
 
 set -e
 
-REPO_DIR="/home/pi/ai-avatar"
-APP_USER="pi"
+REPO_DIR="/home/raspberry/ai-avatar-project"
+APP_USER="raspberry"
 NODE_VERSION="22"
 
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
@@ -84,14 +84,14 @@ echo "━━━━━━━━━━━━━━━━━━━━━━━━�
 echo "  ✅  Setup complete!"
 echo ""
 echo "  Next steps:"
-echo "    1. Edit /home/pi/ai-avatar/.env.local"
+echo "    1. Edit /home/raspberry/ai-avatar-project/.env.local"
 echo "       → Set NEXT_PUBLIC_HEYGEN_TOKEN=your_token"
 echo "    2. Reboot: sudo reboot"
 echo "    3. The Noctra interface will start automatically on boot."
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo "Configurando el Cerebro del Agente..."
 sudo apt-get install -y python3-pip python3-venv
-cd /home/pi/ai-avatar-project/brain
+cd /home/raspberry/ai-avatar-project/brain
 python3 -m venv venv
 source venv/bin/activate
 pip install fastapi uvicorn pydantic

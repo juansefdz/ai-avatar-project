@@ -9,9 +9,9 @@ Wants=network-online.target
 
 [Service]
 Type=simple
-User=pi
-WorkingDirectory=/home/pi/ai-avatar
-EnvironmentFile=/home/pi/ai-avatar/.env.local
+User=raspberry
+WorkingDirectory=/home/raspberry/ai-avatar-project
+EnvironmentFile=/home/raspberry/ai-avatar-project/.env.local
 ExecStart=/usr/bin/node node_modules/.bin/next start -p 3000
 Restart=always
 RestartSec=5

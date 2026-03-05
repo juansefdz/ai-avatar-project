@@ -9,9 +9,9 @@ After=avatar-next.service graphical.target
 
 [Service]
 Type=simple
-User=pi
+User=raspberry
 Environment=DISPLAY=:0
-Environment=XAUTHORITY=/home/pi/.Xauthority
+Environment=XAUTHORITY=/home/raspberry/.Xauthority
 
 # Wait a few seconds for Next.js to be ready
 ExecStartPre=/bin/sleep 6

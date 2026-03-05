@@ -16,7 +16,7 @@ sudo raspi-config nonint do_boot_behaviour B4
 cat <<EOF > ~/launch_noctra.sh
 #!/bin/bash
 # 1. Iniciar el Brain API (FastAPI) en background
-cd /home/pi/ai-avatar-project/brain
+cd /home/raspberry/ai-avatar-project/brain
 source venv/bin/activate
 uvicorn main:app --host 0.0.0.0 --port 8000 &
 
