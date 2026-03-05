@@ -20,8 +20,13 @@ cd /home/raspberry/ai-avatar-project/brain
 source venv/bin/activate
 uvicorn main:app --host 0.0.0.0 --port 8000 &
 
-# 2. Esperar a que Next.js y el API estén listos
-sleep 10
+# 2. Iniciar Next.js en background
+cd /home/raspberry/ai-avatar-project
+npm start &
+
+# 3. Esperar a que Next.js y el API estén listos
+sleep 15
+
 
 # 3. Lanzar Chromium en modo Noctra usando Wayland a 60fps
 # Optimizaciones para aceleración por hardware en Raspi 5
