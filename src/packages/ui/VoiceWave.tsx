@@ -13,7 +13,10 @@ interface VoiceWaveProps {
   isSpeaking: boolean;
 }
 
-export default function VoiceWave({ frequencies, isSpeaking }: VoiceWaveProps) {
+export const VoiceWave: React.FC<VoiceWaveProps> = ({
+  frequencies,
+  isSpeaking,
+}) => {
   const [time, setTime] = useState(0);
 
   const normLows = Math.min(frequencies.lows / 200, 1.2);
@@ -33,9 +36,7 @@ export default function VoiceWave({ frequencies, isSpeaking }: VoiceWaveProps) {
   return (
     <div className="relative flex flex-col items-center justify-center w-full h-screen overflow-hidden pointer-events-none">
       {/* GLOW DE FONDO SUAVE ESTÁTICO (Sin parpadeo molestoso al hablar) */}
-      <motion.div
-        className="absolute w-150 h-75 bg-cyan-500/10 blur-[100px] pointer-events-none rounded-[100%]"
-      />
+      <motion.div className="absolute w-150 h-75 bg-cyan-500/10 blur-[100px] pointer-events-none rounded-[100%]" />
 
       <div className="relative z-10 w-full h-full flex items-center justify-center">
         <svg
@@ -48,7 +49,7 @@ export default function VoiceWave({ frequencies, isSpeaking }: VoiceWaveProps) {
               <feGaussianBlur stdDeviation="12" result="blur" />
               <feComposite in="SourceGraphic" in2="blur" operator="over" />
             </filter>
-            
+
             <linearGradient id="cyanGradient" x1="0%" y1="0%" x2="100%" y2="0%">
               <stop offset="0%" stopColor="transparent" />
               <stop offset="30%" stopColor="#06b6d4" /> {/* cyan-500 */}
@@ -56,7 +57,7 @@ export default function VoiceWave({ frequencies, isSpeaking }: VoiceWaveProps) {
               <stop offset="70%" stopColor="#06b6d4" />
               <stop offset="100%" stopColor="transparent" />
             </linearGradient>
-            
+
             <linearGradient id="blueGradient" x1="0%" y1="0%" x2="100%" y2="0%">
               <stop offset="0%" stopColor="transparent" />
               <stop offset="50%" stopColor="#3b82f6" /> {/* blue-500 */}
@@ -101,13 +102,11 @@ export default function VoiceWave({ frequencies, isSpeaking }: VoiceWaveProps) {
             stroke="url(#cyanGradient)"
             filter="url(#cyanGlow)"
           />
-
-
         </svg>
       </div>
     </div>
   );
-}
+};
 
 function generateSmoothPath(amplitude: number, t: number, m: number) {
   const points = [];
@@ -118,7 +117,7 @@ function generateSmoothPath(amplitude: number, t: number, m: number) {
     const r = x / width;
     const w1 = Math.sin(r * Math.PI * 3 + t);
     const w2 = Math.sin(r * Math.PI * 7 - t * 0.8) * 0.4;
-    
+
     // Smooth tapering center bulge
     const taper = Math.sin(r * Math.PI);
 
@@ -126,5 +125,8 @@ function generateSmoothPath(amplitude: number, t: number, m: number) {
     points.push(`${x},${y}`);
   }
 
-  return `M ${points[0]} ${points.slice(1).map((p) => `L ${p}`).join(" ")}`;
+  return `M ${points[0]} ${points
+    .slice(1)
+    .map((p) => `L ${p}`)
+    .join(" ")}`;
 }

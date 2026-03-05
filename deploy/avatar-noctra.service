@@ -1,9 +1,9 @@
 # ──────────────────────────────────────────────────────────────────────────────
-# avatar-kiosk.service — systemd service: launches Chromium in kiosk mode
+# avatar-noctra.service — systemd service: launches Chromium in noctra mode
 # Depends on avatar-next.service being up first.
 # ──────────────────────────────────────────────────────────────────────────────
 [Unit]
-Description=AI Avatar Kiosk (Chromium)
+Description=AI Avatar Noctra (Chromium)
 Requires=avatar-next.service
 After=avatar-next.service graphical.target
 

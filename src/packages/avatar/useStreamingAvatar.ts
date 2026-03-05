@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState, useEffect } from "react";
+import { useCallback, useState } from "react";
 import type { AvatarState, CallStatus } from "./types";
 
 const INITIAL_STATE: AvatarState = {
@@ -12,67 +12,73 @@ const INITIAL_STATE: AvatarState = {
 export function useStreamingAvatar() {
   const [state, setState] = useState<AvatarState>(INITIAL_STATE);
 
-  // ── FUNCIÓN DE HABLA GENERAL ──
-  const speakWithNoctraVoice = useCallback((text: string) => {
+  // ── FUNCIÓN DE HABLA GENERAL (Voz Hiper-realista) ──
+  const speakWithNoctraVoice = useCallback(async (text: string) => {
+    // Interrumpimos cualquier habla anterior nativa
     window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(text);
-    const voices = window.speechSynthesis
-      .getVoices()
-      .filter((v) => v.lang.startsWith("es"));
 
-    // Prioridad a voces femeninas premium y naturales (Solo en Español)
-    const noctraVoice =
-      voices.find((v) => v.name.includes("Monica")) ||
-      voices.find((v) => v.name.includes("Paulina")) ||
-      voices.find(
-        (v) => v.name.includes("Google") && v.name.includes("Femenino"),
-      ) ||
-      voices.find((v) => v.name.includes("Helena")) ||
-      voices.find(
-        (v) =>
-          v.name.includes("Female") ||
-          v.name.includes("femenino") ||
-          v.name.includes("Femenina"),
-      ) ||
-      voices[0]; // Fallback a la primera voz en español disponible
+    try {
+      const apiKey =
+        process.env.NEXT_PUBLIC_OPENCLAW_KEY ||
+        process.env.NEXT_PUBLIC_OPENAI_API_KEY;
 
-    if (noctraVoice) {
-      utterance.voice = noctraVoice;
-    }
+      if (!apiKey) {
+        console.warn("Sin API Key de OpenAI. Usando voz robótica de respaldo.");
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = "es-ES";
+        utterance.pitch = 1.1; // Tono ligeramente más alto
+        window.speechSynthesis.speak(utterance);
+        return;
+      }
 
-    utterance.lang = "es-ES";
-    utterance.rate = 1.1; // Más ágil y moderna, sin distorsión
-    utterance.pitch = 1.05; // Tono femenino natural, no chillón
+      // Solicitud al modelo TTS-1 de OpenAI
+      // 'nova' es una voz femenina, sutil, suave y muy natural.
+      const res = await fetch("https://api.openai.com/v1/audio/speech", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model: "tts-1",
+          input: text,
+          voice: "nova",
+        }),
+      });
 
-    window.speechSynthesis.speak(utterance);
-  }, []);
+      if (!res.ok) throw new Error("Fallo en la síntesis de OpenAI TTS");
 
-  // ── SALUDOS GENÉRICOS ALEATORIOS ──
-  useEffect(() => {
-    if (state.status === "active") {
-      const loadAndSpeak = () => {
-        setTimeout(() => {
-          const greetings = [
-            "Hola, ¿en qué puedo ayudarte hoy?",
-            "Sistemas listos. ¿Qué tienes en mente?",
-            "Hola, soy Noctra. Estoy lista para lo que necesites.",
-            "Conexión establecida. ¿En qué vamos a trabajar?",
-            "Hola. ¿Hay algo en lo que pueda apoyarte ahora?",
-          ];
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const audio = new Audio(url);
 
-          const randomGreeting =
-            greetings[Math.floor(Math.random() * greetings.length)];
-          speakWithNoctraVoice(randomGreeting);
-        }, 1000);
+      // Capturar stream para las ondas visuales (Compatible con Chromium/Chrome Kiosk)
+      interface AudioWithCapture extends HTMLAudioElement {
+        captureStream?: () => MediaStream;
+        mozCaptureStream?: () => MediaStream;
+      }
+
+      const captureElement = audio as AudioWithCapture;
+      const captureStream =
+        captureElement.captureStream || captureElement.mozCaptureStream;
+      if (captureStream) {
+        const stream = captureStream.call(audio);
+        setState((prev) => ({ ...prev, stream }));
+      }
+
+      audio.onended = () => {
+        URL.revokeObjectURL(url);
+        setState((prev) => ({ ...prev, stream: null }));
       };
 
-      if (window.speechSynthesis.getVoices().length === 0) {
-        window.speechSynthesis.onvoiceschanged = loadAndSpeak;
-      } else {
-        loadAndSpeak();
-      }
+      await audio.play();
+    } catch (error) {
+      console.error("Error al sintetizar voz hiper-realista:", error);
     }
-  }, [state.status, speakWithNoctraVoice]);
+  }, []);
+
+  // ── SALUDOS GENÉRICOS ALEATORIOS ELIMINADOS ──
+  // Ahora el Brain API (FastAPI) proveerá las respuestas iniciales de forma dinámica
 
   // ── MANEJADORES DE ESTADO ──
   const handleCall = useCallback(() => {

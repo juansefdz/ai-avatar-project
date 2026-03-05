@@ -26,7 +26,7 @@ apt-get install -y nodejs
 
 echo "  Node: $(node -v)  |  npm: $(npm -v)"
 
-# ── 3. Install Chromium (kiosk browser) ───────────────────
+# ── 3. Install Chromium (Noctra interface browser) ───────────────────
 echo "[3/7] Installing Chromium..."
 apt-get install -y chromium-browser unclutter
 
@@ -61,15 +61,15 @@ echo "[6/7] Installing systemd services..."
 
 # Next.js server service
 cp "$REPO_DIR/deploy/avatar-next.service" /etc/systemd/system/avatar-next.service
-# Kiosk launcher service
-cp "$REPO_DIR/deploy/avatar-kiosk.service" /etc/systemd/system/avatar-kiosk.service
+# Noctra launcher service
+cp "$REPO_DIR/deploy/avatar-noctra.service" /etc/systemd/system/avatar-noctra.service
 
 systemctl daemon-reload
 systemctl enable avatar-next.service
-systemctl enable avatar-kiosk.service
+systemctl enable avatar-noctra.service
 
 # ── 7. Disable screen blanking ────────────────────────────
-echo "[7/7] Disabling screen blanking for kiosk mode..."
+echo "[7/7] Disabling screen blanking for Noctra mode..."
 AUTOSTART_FILE="/etc/xdg/lxsession/LXDE-pi/autostart"
 if ! grep -q "xset s off" "$AUTOSTART_FILE" 2>/dev/null; then
   cat >> "$AUTOSTART_FILE" << 'EOF'
@@ -87,5 +87,11 @@ echo "  Next steps:"
 echo "    1. Edit /home/pi/ai-avatar/.env.local"
 echo "       → Set NEXT_PUBLIC_HEYGEN_TOKEN=your_token"
 echo "    2. Reboot: sudo reboot"
-echo "    3. The kiosk will start automatically on boot."
+echo "    3. The Noctra interface will start automatically on boot."
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "Configurando el Cerebro del Agente..."
+sudo apt-get install -y python3-pip python3-venv
+cd /home/pi/ai-avatar-project/brain
+python3 -m venv venv
+source venv/bin/activate
+pip install fastapi uvicorn pydantic

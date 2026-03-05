@@ -17,7 +17,7 @@ export const metadata: Metadata = {
   description: "IA Agent Noctra",
 };
 
-// Kiosk-friendly: prevents pinch-zoom and browser chrome scaling on Pi
+// Noctra-friendly: prevents pinch-zoom and browser chrome scaling on Pi
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
